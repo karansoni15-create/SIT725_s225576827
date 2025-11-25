@@ -1,61 +1,96 @@
+// server.js
 const express = require('express');
+const path = require('path');
+
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Serve public folder
-app.use(express.static('public'));
-app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Simple GET test
-app.get('/hello', (req, res) => {
-  res.send('Hello! Express server is running.');
+// In-memory list
+const codes = [
+  "Keep learning",
+  "Practice small tasks daily",
+  "Read the docs first",
+  "Ask for help when stuck"
+];
+
+// ---------------------------------------------------
+//  GET /api/code — return random tip
+// ---------------------------------------------------
+app.get('/api/code', (req, res) => {
+  const idx = Math.floor(Math.random() * codes.length);
+  res.json({ code: codes[idx] });
 });
 
-// Add two numbers - GET (required by task)
-app.get('/add', (req, res) => {
-  const a = Number(req.query.a);
-  const b = Number(req.query.b);
+// ---------------------------------------------------
+//  POST /api/code — add a new tip
+// ---------------------------------------------------
+app.post('/api/code', (req, res) => {
+  const { code } = req.body;
 
-  if (isNaN(a) || isNaN(b)) {
-    return res.send('Invalid numbers. Use /add?a=5&b=7');
+  if (!code || typeof code !== 'string' || code.trim().length === 0) {
+    return res.status(400).json({ error: "Invalid 'code' string" });
   }
 
-  res.send(`The sum is ${a + b}`);
+  codes.push(code.trim());
+  res.status(201).json({ message: "Code added", added: code });
 });
 
-// Extra calculator endpoint
-app.get('/calc', (req, res) => {
-  const op = req.query.op;
-  const a = Number(req.query.a);
-  const b = Number(req.query.b);
+// ---------------------------------------------------
+//  GET /api/add?x=4&y=7 — add two numbers
+// ---------------------------------------------------
+app.get('/api/add', (req, res) => {
+  console.log("ADD endpoint called:", req.query);
 
-  if (isNaN(a) || isNaN(b)) {
-    return res.send('Invalid inputs.');
+  const x = parseFloat(req.query.x);
+  const y = parseFloat(req.query.y);
+
+  if (Number.isNaN(x) || Number.isNaN(y)) {
+    return res.status(400).json({
+      error: "Please supply numeric x and y. Example: /api/add?x=2&y=3",
+      received: req.query
+    });
   }
 
-  let result;
-
-  switch (op) {
-    case "add": result = a + b; break;
-    case "sub": result = a - b; break;
-    case "mul": result = a * b; break;
-    case "div":
-      if (b === 0) return res.send("Cannot divide by zero");
-      result = a / b;
-      break;
-    default:
-      return res.send("Invalid operation. Use add, sub, mul, div.");
-  }
-
-  res.send(`Result: ${result}`);
+  res.json({
+    x,
+    y,
+    sum: x + y
+  });
 });
 
-// Root
-app.get('/', (req, res) => {
-  res.send('Welcome to SIT725 Express Server');
+// ---------------------------------------------------
+//  GET /api/square?num=5 — square of a number
+// ---------------------------------------------------
+app.get('/api/square', (req, res) => {
+  const n = parseFloat(req.query.num);
+
+  if (Number.isNaN(n)) {
+    return res.status(400).json({
+      error: "Please supply numeric num. Example: /api/square?num=5"
+    });
+  }
+
+  res.json({
+    number: n,
+    square: n * n
+  });
+});
+
+// ---------------------------------------------------
+//  FALLBACK ROUTE — MUST BE LAST
+// ---------------------------------------------------
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ error: "API endpoint not found" });
 });
 
 // Start server
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
