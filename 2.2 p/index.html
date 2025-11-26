@@ -1,108 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Practice 2.2P - Express </title>
-  <style>
-    body{font-family:Arial,margin:24px;max-width:900px}
-    h1{font-size:28px}
-    section{margin:18px 0}
-    input[type="text"], input[type="number"]{padding:6px; width:200px; margin-right:8px}
-    button{padding:6px 10px}
-    #addResult, #postResult, #code {margin-top:10px; white-space:pre-wrap; background:#fafafa; border:1px solid #eee; padding:8px}
-  </style>
+  <title>SIT725 - Express Calculator</title>
 </head>
 <body>
-  <h1>Practice 2.2P - Express Demo</h1>
+  <h1>SIT725 - Express Calculator</h1>
 
- 
-  <section>
-    <h3>Add a tip</h3>
-    <input id="newTip" placeholder="New tip text" type="text" />
-    <button id="postTip">Add Tip</button>
-    <div id="postResult"></div>
-  </section>
+  <p>Try the links below:</p>
+  <ul>
+    <li><a href="/add?a=10&b=20">/add?a=10&b=20</a></li>
+    <li><a href="/calc?op=sub&a=50&b=13">/calc?op=sub&a=50&b=13</a></li>
+  </ul>
 
-  <section>
-    <h3>Add two numbers </h3>
-    <input id="ax" placeholder="x" type="number" />
-    <input id="by" placeholder="y" type="number" />
-    <button id="doAdd">Calculate</button>
-    <div id="addResult"></div>
-  </section>
-
-  <section>
-    <h3>Square </h3>
-    <input id="num" placeholder="num" type="number" />
-    <button id="doSquare">Square</button>
-    <div id="squareResult"></div>
-  </section>
-
-<script>
-  // GET /api/code
-  document.getElementById('getCode').addEventListener('click', async () => {
-    try {
-      const r = await fetch('/api/code');
-      const j = await r.json();
-      document.getElementById('code').innerText = JSON.stringify(j, null, 2);
-      console.log('/api/code', j);
-    } catch (e) {
-      console.error(e);
-      document.getElementById('code').innerText = 'Error fetching tip';
-    }
-  });
-
-  // POST /api/code
-  document.getElementById('postTip').addEventListener('click', async () => {
-    const val = document.getElementById('newTip').value.trim();
-    if (!val) { document.getElementById('postResult').innerText = 'Enter a tip first'; return; }
-    try {
-      const r = await fetch('/api/code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: val })
-      });
-      const j = await r.json();
-      document.getElementById('postResult').innerText = JSON.stringify(j, null, 2);
-      console.log('/api/code POST', j);
-    } catch (e) {
-      console.error(e);
-      document.getElementById('postResult').innerText = 'Error posting tip';
-    }
-  });
-
-  // GET /api/add
-  document.getElementById('doAdd').addEventListener('click', async () => {
-    const x = document.getElementById('ax').value;
-    const y = document.getElementById('by').value;
-    const out = document.getElementById('addResult');
-    if (x === '' || y === '') { out.innerText = 'Enter both numbers'; return; }
-    try {
-      const url = `/api/add?x=${encodeURIComponent(x)}&y=${encodeURIComponent(y)}`;
-      console.log('fetch', url);
-      const r = await fetch(url);
-      const j = await r.json();
-      out.innerText = JSON.stringify(j, null, 2);
-    } catch (e) {
-      console.error(e);
-      out.innerText = 'Error calling API';
-    }
-  });
-
-  // GET /api/square
-  document.getElementById('doSquare').addEventListener('click', async () => {
-    const n = document.getElementById('num').value;
-    const out = document.getElementById('squareResult');
-    if (n === '') { out.innerText = 'Enter a number'; return; }
-    try {
-      const r = await fetch(`/api/square?num=${encodeURIComponent(n)}`);
-      const j = await r.json();
-      out.innerText = JSON.stringify(j, null, 2);
-    } catch (e) {
-      console.error(e);
-      out.innerText = 'Error';
-    }
-  });
-</script>
+  <p>POST /add can be tested using tools like Postman or Thunder Client.</p>
 </body>
 </html>
