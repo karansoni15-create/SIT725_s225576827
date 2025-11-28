@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculator — Basic</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="card calc-card" aria-labelledby="calcTitle">
+      <h1 id="calcTitle" class="title">Basic Calculator</h1>
+
+      <form id="calcForm" class="calc-form" autocomplete="off" novalidate>
+        <div class="fields">
+          <div class="field">
+            <label for="a">Number A</label>
+            <input id="a" name="a" type="number" step="any" inputmode="decimal" placeholder="e.g. 12.5" />
+          </div>
+
+          <div class="field field-op">
+            <label for="op">Operator</label>
+            <select id="op" name="op" aria-label="Operator">
+              <option value="+">+</option>
+              <option value="-">−</option>
+              <option value="*">×</option>
+              <option value="/">÷</option>
+              <option value="%">mod</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="b">Number B</label>
+            <input id="b" name="b" type="number" step="any" inputmode="decimal" placeholder="e.g. 3" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="calcBtn" type="submit" class="btn primary">Calculate</button>
+          <button id="clearBtn" type="button" class="btn ghost">Clear</button>
+        </div>
+
+        <div class="output" aria-live="polite">
+          <div class="result" id="result">Result: <span id="resultValue">—</span></div>
+          <div id="error" class="error" role="status"></div>
+        </div>
+      </form>
+
+      <footer class="card-foot">
+        <small class="hint">This posts the calculation to the server at <code>/calc</code>. If the server is unreachable it will compute locally.</small>
+      </footer>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

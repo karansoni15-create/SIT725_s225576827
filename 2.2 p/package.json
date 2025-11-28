@@ -1,14 +1,12 @@
 {
-  "name": "sit725-task-2-2p",
+  "name": "calc-app-22p",
   "version": "1.0.0",
-  "description": "Express web server for SIT725 task 2.2P",
+  "description": "Basic calculator served with Express",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "author": "Karan Soni",
-  "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.18.2"
   }
 }

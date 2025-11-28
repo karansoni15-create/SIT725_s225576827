@@ -1,61 +1,65 @@
 const express = require('express');
-const app = express();
-const port = 3000;
+const path = require('path');
 
-// Serve public folder
-app.use(express.static('public'));
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// parse JSON bodies
 app.use(express.json());
 
-// Simple GET test
-app.get('/hello', (req, res) => {
-  res.send('Hello! Express server is running.');
-});
+// serve static files from public/
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Add two numbers - GET (required by task)
-app.get('/add', (req, res) => {
-  const a = Number(req.query.a);
-  const b = Number(req.query.b);
+// calculation endpoint
+app.post('/calc', (req, res) => {
+  try {
+    const { a, b, op } = req.body;
 
-  if (isNaN(a) || isNaN(b)) {
-    return res.send('Invalid numbers. Use /add?a=5&b=7');
+    const numA = Number(a);
+    const numB = Number(b);
+
+    if (!isFinite(numA) || !isFinite(numB)) {
+      return res.status(400).json({ error: 'Invalid numbers' });
+    }
+
+    let result;
+    switch (op) {
+      case '+':
+        result = numA + numB;
+        break;
+      case '-':
+        result = numA - numB;
+        break;
+      case '*':
+      case 'x':
+        result = numA * numB;
+        break;
+      case '/':
+        if (numB === 0) return res.status(400).json({ error: 'Division by zero' });
+        result = numA / numB;
+        break;
+      case '%':
+        result = numA % numB;
+        break;
+      default:
+        return res.status(400).json({ error: 'Unsupported operator' });
+    }
+
+    // normalize result precision for floats
+    if (!Number.isInteger(result)) result = parseFloat(result.toFixed(8));
+
+    res.json({ result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
   }
-
-  res.send(`The sum is ${a + b}`);
 });
 
-// Extra calculator endpoint
-app.get('/calc', (req, res) => {
-  const op = req.query.op;
-  const a = Number(req.query.a);
-  const b = Number(req.query.b);
-
-  if (isNaN(a) || isNaN(b)) {
-    return res.send('Invalid inputs.');
-  }
-
-  let result;
-
-  switch (op) {
-    case "add": result = a + b; break;
-    case "sub": result = a - b; break;
-    case "mul": result = a * b; break;
-    case "div":
-      if (b === 0) return res.send("Cannot divide by zero");
-      result = a / b;
-      break;
-    default:
-      return res.send("Invalid operation. Use add, sub, mul, div.");
-  }
-
-  res.send(`Result: ${result}`);
+// fallback to index.html for unknown routes (optional)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Root
-app.get('/', (req, res) => {
-  res.send('Welcome to SIT725 Express Server');
-});
-
-// Start server
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
