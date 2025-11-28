@@ -1,49 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>QuickCalc</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NightCalc</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <main class="shell">
-    <h1 class="app-title">QuickCalc</h1>
+<div class="frame">
+  <h1 class="title">NightCalc</h1>
 
-    <section class="tool-box">
-      <div class="row">
-        <label class="lbl">First number</label>
-        <input id="vA" class="inp" type="text" placeholder="type a number">
-      </div>
+  <div class="block">
+    <label class="lab">Enter Value A</label>
+    <input id="xInput" class="field" placeholder="e.g. 44.7">
+  </div>
 
-      <div class="row">
-        <label class="lbl">Operation</label>
-        <select id="vOp" class="inp">
-          <option value="+">plus</option>
-          <option value="-">minus</option>
-          <option value="*">times</option>
-          <option value="/">divide</option>
-          <option value="%">mod</option>
-        </select>
-      </div>
+  <div class="block">
+    <label class="lab">Choose Action</label>
+    <select id="action" class="field">
+      <option value="+">Add</option>
+      <option value="-">Subtract</option>
+      <option value="*">Multiply</option>
+      <option value="/">Divide</option>
+      <option value="%">Remainder</option>
+    </select>
+  </div>
 
-      <div class="row">
-        <label class="lbl">Second number</label>
-        <input id="vB" class="inp" type="text" placeholder="type another number">
-      </div>
+  <div class="block">
+    <label class="lab">Enter Value B</label>
+    <input id="yInput" class="field" placeholder="e.g. 8">
+  </div>
 
-      <button id="goBtn" class="action main">Do Maths</button>
-      <button id="clearBtn" class="action soft">Clear</button>
+  <button id="runBtn" class="btn main">Calculate</button>
+  <button id="wipeBtn" class="btn alt">Reset</button>
 
-      <div class="result-wrap">
-        <p class="result-line">Outcome: <span id="ans">—</span></p>
-        <p id="warn" class="warning"></p>
-      </div>
-    </section>
+  <p class="out">Result: <span id="numOut">--</span></p>
+  <p id="note" class="note"></p>
 
-  </main>
+</div>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
