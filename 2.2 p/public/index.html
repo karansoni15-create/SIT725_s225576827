@@ -1,55 +1,47 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Calculator — Basic</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QuickCalc</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="page">
-    <section class="card calc-card" aria-labelledby="calcTitle">
-      <h1 id="calcTitle" class="title">Basic Calculator</h1>
 
-      <form id="calcForm" class="calc-form" autocomplete="off" novalidate>
-        <div class="fields">
-          <div class="field">
-            <label for="a">Number A</label>
-            <input id="a" name="a" type="number" step="any" inputmode="decimal" placeholder="e.g. 12.5" />
-          </div>
+  <main class="shell">
+    <h1 class="app-title">QuickCalc</h1>
 
-          <div class="field field-op">
-            <label for="op">Operator</label>
-            <select id="op" name="op" aria-label="Operator">
-              <option value="+">+</option>
-              <option value="-">−</option>
-              <option value="*">×</option>
-              <option value="/">÷</option>
-              <option value="%">mod</option>
-            </select>
-          </div>
+    <section class="tool-box">
+      <div class="row">
+        <label class="lbl">First number</label>
+        <input id="vA" class="inp" type="text" placeholder="type a number">
+      </div>
 
-          <div class="field">
-            <label for="b">Number B</label>
-            <input id="b" name="b" type="number" step="any" inputmode="decimal" placeholder="e.g. 3" />
-          </div>
-        </div>
+      <div class="row">
+        <label class="lbl">Operation</label>
+        <select id="vOp" class="inp">
+          <option value="+">plus</option>
+          <option value="-">minus</option>
+          <option value="*">times</option>
+          <option value="/">divide</option>
+          <option value="%">mod</option>
+        </select>
+      </div>
 
-        <div class="actions">
-          <button id="calcBtn" type="submit" class="btn primary">Calculate</button>
-          <button id="clearBtn" type="button" class="btn ghost">Clear</button>
-        </div>
+      <div class="row">
+        <label class="lbl">Second number</label>
+        <input id="vB" class="inp" type="text" placeholder="type another number">
+      </div>
 
-        <div class="output" aria-live="polite">
-          <div class="result" id="result">Result: <span id="resultValue">—</span></div>
-          <div id="error" class="error" role="status"></div>
-        </div>
-      </form>
+      <button id="goBtn" class="action main">Do Maths</button>
+      <button id="clearBtn" class="action soft">Clear</button>
 
-      <footer class="card-foot">
-        <small class="hint">This posts the calculation to the server at <code>/calc</code>. If the server is unreachable it will compute locally.</small>
-      </footer>
+      <div class="result-wrap">
+        <p class="result-line">Outcome: <span id="ans">—</span></p>
+        <p id="warn" class="warning"></p>
+      </div>
     </section>
+
   </main>
 
   <script src="script.js"></script>
