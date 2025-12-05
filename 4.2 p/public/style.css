@@ -1,0 +1,52 @@
+body.dark-bg {
+    background: #0f1115;
+    color: white;
+}
+
+.panel-dark {
+    background: #131821 !important;
+    border-radius: 12px;
+}
+
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    padding-top: 10px;
+}
+
+.cover-card {
+    background: #0f141a;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform .2s ease;
+    text-align: center;
+}
+
+.cover-card:hover {
+    transform: scale(1.04);
+}
+
+.book-thumb {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.cover-title {
+    color: #e4e4e4;
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+.modal-cover {
+    width: 60%;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.modal-footer {
+    background-color: #11161e !important;
+}
