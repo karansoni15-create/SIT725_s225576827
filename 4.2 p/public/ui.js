@@ -79,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify(data)
         })
         .then(() => {
+            console.log("Book saved");
             loadBooks();
             clearForm();
         })
