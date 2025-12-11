@@ -1,98 +1,123 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookshelf</title>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <title>Bookshelf - 4.2P</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; background:#111; color:#eee; }
+    .container { max-width:900px; margin:0 auto; display:flex; gap:20px; }
+    form { width:300px; background:#1b1b1b; padding:16px; border-radius:8px; }
+    input, textarea { width:100%; padding:8px; margin:8px 0; border-radius:4px; border:1px solid #333; background:#0f0f0f; color:#eee; }
+    button { padding:10px 14px; border:none; border-radius:6px; cursor:pointer; }
+    .books { flex:1; }
+    .book { background:#161616; padding:12px; margin-bottom:8px; border-radius:6px; }
+    .error { color:#ff8080; }
+    .success { color:#80ffb3; }
+  </style>
 </head>
+<body>
+  <h1>Bookshelf (4.2P)</h1>
+  <div class="container">
+    <form id="bookForm">
+      <h3>Add / Upload</h3>
+      <label>Title *</label>
+      <input id="title" type="text" required>
+      <label>Author *</label>
+      <input id="author" type="text" required>
+      <label>Year *</label>
+      <input id="year" type="number" required>
+      <label>Description *</label>
+      <textarea id="description" rows="4" required></textarea>
+      <label>Cover Image URL (optional)</label>
+      <input id="cover" type="text" placeholder="https://... or leave blank">
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button type="submit" id="saveBtn">SAVE</button>
+        <button type="button" id="clearBtn">CLEAR</button>
+      </div>
+      <div id="msg" aria-live="polite"></div>
+    </form>
 
-<body class="dark-bg">
-
-    <nav class="nav-wrapper teal darken-4">
-        <div class="brand-logo center">Bookshelf</div>
-    </nav>
-
-    <div class="container section">
-        <h4 class="center white-text">Click a cover to open a preview.</h4>
-
-        <div class="row">
-            <!-- LEFT FORM -->
-            <div class="col s12 m4">
-                <div class="card panel-dark">
-                    <div class="card-content">
-                        <span class="card-title white-text">Add / Upload</span>
-
-                        <div class="input-field">
-                            <input id="title" type="text">
-                            <label for="title">Title (optional)</label>
-                        </div>
-
-                        <div class="input-field">
-                            <input id="author" type="text">
-                            <label for="author">Author (optional)</label>
-                        </div>
-
-                        <div class="input-field">
-                            <input id="year" type="number">
-                            <label for="year">Year (optional)</label>
-                        </div>
-
-                        <div class="input-field">
-                            <textarea id="description" class="materialize-textarea"></textarea>
-                            <label for="description">Short description</label>
-                        </div>
-
-                        <div class="file-field input-field">
-                            <div class="btn teal">
-                                <span>COVER</span>
-                                <input type="file" id="cover-file" accept="image/*">
-                            </div>
-                            <div class="file-path-wrapper">
-                                <input class="file-path validate" type="text" placeholder="Upload a cover image">
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col s6">
-                                <button id="save-btn" class="btn green">Save</button>
-                            </div>
-                            <div class="col s6">
-                                <button id="clear-btn" class="btn grey">Clear</button>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT: COVER GRID -->
-            <div class="col s12 m8">
-                <div class="card panel-dark">
-                    <div class="card-content">
-                        <span class="card-title white-text">Top Covers</span>
-                        <div id="covers-grid" class="grid-layout"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="books">
+      <h3>Top Covers</h3>
+      <div id="booksList"></div>
     </div>
+  </div>
 
-    <!-- MODAL FOR IMAGE PREVIEW -->
-    <div id="preview-modal" class="modal modal-fixed-footer panel-dark">
-        <div class="modal-content center">
-            <img id="modal-img" class="modal-cover" src="" alt="">
-            <h5 id="modal-title" class="white-text"></h5>
-            <p id="modal-author" class="grey-text lighten-2"></p>
-        </div>
-        <div class="modal-footer panel-dark">
-            <a href="#!" class="modal-close btn teal darken-3">Close</a>
-        </div>
-    </div>
+<script>
+async function fetchBooks() {
+  const list = document.getElementById('booksList');
+  list.innerHTML = 'Loading...';
+  try {
+    const res = await fetch('/api/books');
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error(data.error || 'Unexpected response');
+    if (data.length === 0) {
+      list.innerHTML = '<p>No books yet.</p>';
+      return;
+    }
+    list.innerHTML = '';
+    data.forEach(book => {
+      const el = document.createElement('div');
+      el.className = 'book';
+      el.innerHTML = `
+        <strong>${escapeHtml(book.title)}</strong> — ${escapeHtml(book.author)} (${book.year})<br>
+        <small>${new Date(book.createdAt).toLocaleString()}</small>
+        <p>${escapeHtml(book.description)}</p>
+        ${book.coverImage ? `<img src="${escapeHtml(book.coverImage)}" alt="cover" style="max-width:120px;display:block;margin-top:8px;">` : ''}
+      `;
+      list.appendChild(el);
+    });
+  } catch (err) {
+    list.innerHTML = '<p class="error">Error fetching books: ' + err.message + '</p>';
+  }
+}
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="ui.js"></script>
+function escapeHtml(s) {
+  if (!s) return '';
+  return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+}
+
+document.getElementById('bookForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('msg');
+  msg.textContent = '';
+  const title = document.getElementById('title').value.trim();
+  const author = document.getElementById('author').value.trim();
+  const year = document.getElementById('year').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const coverImage = document.getElementById('cover').value.trim();
+
+  // Frontend validation
+  if (!title || !author || !year || !description) {
+    msg.innerHTML = '<span class="error">Please fill all required fields.</span>';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/books', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, author, year: Number(year), description, coverImage })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+    msg.innerHTML = '<span class="success">Saved successfully.</span>';
+    // clear inputs
+    document.getElementById('bookForm').reset();
+    // refresh list
+    fetchBooks();
+  } catch (err) {
+    msg.innerHTML = '<span class="error">Save failed: ' + err.message + '</span>';
+  }
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('bookForm').reset();
+  document.getElementById('msg').textContent = '';
+});
+
+window.addEventListener('load', fetchBooks);
+</script>
 </body>
 </html>
