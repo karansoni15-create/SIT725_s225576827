@@ -1,0 +1,14 @@
+body {
+  font-family: Arial;
+  padding: 20px;
+}
+
+li {
+  cursor: pointer;
+  padding: 5px;
+  list-style: none;
+  border-bottom: 1px solid #ddd;
+}
+li:hover {
+  background: #eee;
+}
