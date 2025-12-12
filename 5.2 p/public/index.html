@@ -1,59 +1,157 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Books Catalog - SIT725 5.1P</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Books Catalogue — SIT725 (5.2P)</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Books Catalog</h1>
-    <p>List of books (title — author)</p>
-    <button id="fetchBtn">Fetch books</button>
-    <div id="loading"></div>
-    <div id="error" class="error"></div>
-    <ul id="booksList"></ul>
-  </div>
+  <main class="wrap" role="main" aria-labelledby="pageTitle">
+    <header class="header">
+      <h1 id="pageTitle">Books Catalogue — developed by s1234567</h1>
+      <p class="subtitle">Simple MVC client — fetches data from <code>/api/books</code></p>
+    </header>
+
+    <section class="controls">
+      <button id="fetchBtn" class="btn">Get all books</button>
+      <div id="loading" class="muted" aria-live="polite"></div>
+      <div id="error" class="error" role="alert"></div>
+    </section>
+
+    <section class="content">
+      <ul id="booksList" class="books" aria-label="Books list"></ul>
+
+      <aside id="details" class="card details" hidden aria-hidden="true">
+        <button id="closeBtn" class="close">✕</button>
+        <h2 id="d_title" class="detail-title"></h2>
+        <p class="meta"><strong>Author:</strong> <span id="d_author"></span></p>
+        <p class="meta"><strong>Year:</strong> <span id="d_year"></span></p>
+        <p class="meta"><strong>Genre:</strong> <span id="d_genre"></span></p>
+        <p class="summary"><strong>Summary:</strong></p>
+        <p id="d_summary" class="summary-text"></p>
+        <p class="meta"><strong>Price (AUD):</strong> <span id="d_price"></span></p>
+      </aside>
+    </section>
+
+    <footer class="footer">SIT725 — Practical 5.2P</footer>
+  </main>
 
   <script>
+    // Minimal JS for 5.2P client (works with /api/books and /api/books/:id)
     const fetchBtn = document.getElementById('fetchBtn');
     const booksList = document.getElementById('booksList');
     const loading = document.getElementById('loading');
     const errorDiv = document.getElementById('error');
 
-    function render(items) {
+    const details = document.getElementById('details');
+    const d_title = document.getElementById('d_title');
+    const d_author = document.getElementById('d_author');
+    const d_year = document.getElementById('d_year');
+    const d_genre = document.getElementById('d_genre');
+    const d_summary = document.getElementById('d_summary');
+    const d_price = document.getElementById('d_price');
+    const closeBtn = document.getElementById('closeBtn');
+
+    function setLoading(text = '') {
+      loading.textContent = text;
+    }
+    function setError(msg) {
+      errorDiv.textContent = msg;
+    }
+    function clearError() {
+      errorDiv.textContent = '';
+    }
+
+    function formatPrice(p) {
+      if (p == null) return '';
+      const n = Number(p);
+      return Number.isFinite(n) ? n.toFixed(2) + ' AUD' : String(p) + ' AUD';
+    }
+
+    function renderList(items) {
       booksList.innerHTML = '';
       if (!Array.isArray(items) || items.length === 0) {
-        booksList.textContent = 'No items';
+        booksList.innerHTML = '<li class="empty">No books available</li>';
         return;
       }
-      items.forEach(it => {
+      items.forEach(b => {
         const li = document.createElement('li');
-        li.innerHTML = '<span class="title">' + it.title + '</span>' +
-                       '<span class="author"> — ' + it.author + '</span>';
+        li.className = 'book';
+        li.innerHTML = `
+          <div class="left">
+            <div class="title">${escapeHtml(b.title)}</div>
+            <div class="author">${escapeHtml(b.author)}</div>
+          </div>
+          <div class="right">${formatPrice(b.price)}</div>
+        `;
+        li.addEventListener('click', () => loadDetails(b.id));
         booksList.appendChild(li);
       });
     }
 
     async function fetchBooks() {
-      loading.textContent = 'Loading...';
-      errorDiv.textContent = '';
+      clearError();
+      setLoading('Loading books...');
       try {
         const res = await fetch('/api/books');
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        const body = await res.json(); // { statusCode, data, message }
-        render(body.data);
+        const body = await res.json();
+        renderList(body.data || []);
       } catch (err) {
-        console.error(err);
-        errorDiv.textContent = 'Error fetching books: ' + err.message;
+        setError('Could not load books: ' + err.message);
       } finally {
-        loading.textContent = '';
+        setLoading('');
       }
     }
 
+    async function loadDetails(id) {
+      clearError();
+      setLoading('Loading details...');
+      try {
+        const res = await fetch('/api/books/' + id);
+        if (!res.ok) {
+          if (res.status === 404) throw new Error('Book not found');
+          throw new Error('HTTP ' + res.status);
+        }
+        const body = await res.json();
+        const b = body.data;
+        d_title.textContent = b.title || '';
+        d_author.textContent = b.author || '';
+        d_year.textContent = b.year || '';
+        d_genre.textContent = b.genre || '';
+        d_summary.textContent = b.summary || '';
+        d_price.textContent = formatPrice(b.price);
+        details.hidden = false;
+        details.setAttribute('aria-hidden', 'false');
+        details.scrollIntoView({behavior:'smooth', block:'center'});
+      } catch (err) {
+        setError('Could not load details: ' + err.message);
+      } finally {
+        setLoading('');
+      }
+    }
+
+    closeBtn.addEventListener('click', () => {
+      details.hidden = true;
+      details.setAttribute('aria-hidden', 'true');
+    });
+
+    // small helper to avoid XSS in rendered strings
+    function escapeHtml(s) {
+      if (s == null) return '';
+      return s.toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Hook up
     fetchBtn.addEventListener('click', fetchBooks);
-    window.addEventListener('load', fetchBooks);
+    // optionally fetch on load:
+    // window.addEventListener('load', fetchBooks);
   </script>
 </body>
 </html>
