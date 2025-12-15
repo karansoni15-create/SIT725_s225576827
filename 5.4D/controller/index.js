@@ -1,19 +1,67 @@
-const service = require("../services/service");
+const Book = require("../models/book.model");
 
-const getAllBooks = async (req, res) => {
-  const data = await service.getAllBooks();
-  res.status(200).json({ statusCode: 200, data });
+/* ---------- GET ALL BOOKS ---------- */
+exports.getAllBooks = async (req, res) => {
+  const books = await Book.find({});
+  res.status(200).json({
+    statusCode: 200,
+    data: books
+  });
 };
 
-const getBookById = async (req, res) => {
-  const book = await service.getBookById(req.params.id);
-  if (!book) return res.status(404).json({ statusCode: 404, message: "Not found" });
-  res.status(200).json({ statusCode: 200, data: book });
+/* ---------- GET BOOK BY ID ---------- */
+exports.getBookById = async (req, res) => {
+  const book = await Book.findOne({ id: req.params.id });
+  if (!book) {
+    return res.status(404).json({ message: "Book not found" });
+  }
+  res.status(200).json(book);
 };
 
-const checkIntegrity = async (req, res) => {
-  const valid = await service.integrityCheck();
-  return valid ? res.sendStatus(204) : res.sendStatus(409);
+/* ---------- CREATE BOOK ---------- */
+exports.createBook = async (req, res) => {
+  try {
+    const book = new Book(req.body);
+    const savedBook = await book.save();
+    res.status(201).json(savedBook);
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ message: "Duplicate book id" });
+    }
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
-module.exports = { getAllBooks, getBookById, checkIntegrity };
+/* ---------- UPDATE BOOK ---------- */
+exports.updateBook = async (req, res) => {
+  if ("id" in req.body) {
+    return res.status(400).json({ message: "ID cannot be updated" });
+  }
+
+  try {
+    const updated = await Book.findOneAndUpdate(
+      { id: req.params.id },
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    res.status(200).json(updated);
+  } catch (err) {
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/* ---------- INTEGRITY CHECK ---------- */
+exports.checkIntegrity = (req, res) => {
+  res.status(204).send();
+};

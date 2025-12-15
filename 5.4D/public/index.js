@@ -1,30 +1,52 @@
-document.getElementById("getBooks").addEventListener("click", async () => {
-  const res = await fetch("/api/books");
-  const data = await res.json();
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("getBooksBtn");
+  const container = document.getElementById("booksContainer");
 
-  const list = document.getElementById("bookList");
-  list.innerHTML = "";
+  if (!btn || !container) {
+    console.error("HTML elements missing");
+    return;
+  }
 
-  data.data.forEach(book => {
-    const item = document.createElement("li");
-    item.textContent = `${book.title} — ${book.author}`;
-    item.onclick = () => showDetails(book.id);
-    list.appendChild(item);
+  btn.addEventListener("click", async () => {
+    container.innerHTML = "";
+
+    try {
+      const res = await fetch("/api/books");
+      const json = await res.json();
+
+      // backend returns { statusCode, data }
+      const books = Array.isArray(json.data) ? json.data : [];
+
+      if (books.length === 0) {
+        container.innerHTML = "<p>No books found.</p>";
+        return;
+      }
+
+      books.forEach(book => {
+        if (!book || typeof book !== "object") return;
+        if (!book.title || !book.author) return;
+
+        const price =
+          book.price && book.price.$numberDecimal
+            ? book.price.$numberDecimal
+            : "0.00";
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+
+        card.innerHTML = `
+          <h3>${book.title}</h3>
+          <p>${book.author}</p>
+          <p>${price} AUD</p>
+        `;
+
+        container.appendChild(card);
+      });
+
+    } catch (e) {
+      console.error(e);
+      container.innerHTML =
+        "<p style='color:red'>Failed to load books</p>";
+    }
   });
 });
-
-async function showDetails(id) {
-  const res = await fetch(`/api/books/${id}`);
-  const data = await res.json();
-
-  const d = data.data;
-
-  document.getElementById("details").innerHTML = `
-    <h2>${d.title}</h2>
-    <p><strong>Author:</strong> ${d.author}</p>
-    <p><strong>Year:</strong> ${d.year}</p>
-    <p><strong>Genre:</strong> ${d.genre}</p>
-    <p><strong>Summary:</strong> ${d.summary}</p>
-    <p><strong>Price:</strong> $${parseFloat(d.price.$numberDecimal)}</p>
-  `;
-}
