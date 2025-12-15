@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Books Catalogue — SIT725</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container" role="main" aria-labelledby="pageTitle">
+    <header>
+      <h1 id="pageTitle">Books Catalogue — developed by s1234567</h1>
+      <p style="text-align:center; color:#666; margin-top:-10px; margin-bottom:18px;">
+        Click <strong>Get all books</strong> to load the catalogue from the server.
+      </p>
+    </header>
+
+    <section aria-label="controls" style="text-align:center;">
+      <button id="fetchBtn" type="button">Get all books</button>
+    </section>
+
+    <section id="status" aria-live="polite" style="margin-top:12px;">
+      <div id="loading" aria-hidden="true"></div>
+      <div id="error" class="error" role="alert"></div>
+    </section>
+
+    <section aria-label="books list" style="margin-top:18px;">
+      <ul id="booksList" aria-describedby="booksHint"></ul>
+      <p id="booksHint" style="color:#777; font-size:13px; margin-top:6px;">
+        Click any book to view full details.
+      </p>
+    </section>
+
+    <aside id="bookDetails" class="details" style="display:none; margin-top:22px; padding:14px; border-radius:10px; background:#fff; box-shadow:0 4px 18px rgba(0,0,0,0.06);">
+      <button id="closeDetails" style="float:right; background:#eee; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">Close</button>
+      <h2 id="d_title" style="margin-top:0;"></h2>
+      <p><strong>Author:</strong> <span id="d_author"></span></p>
+      <p><strong>Year:</strong> <span id="d_year"></span></p>
+      <p><strong>Genre:</strong> <span id="d_genre"></span></p>
+      <p><strong>Summary:</strong></p>
+      <p id="d_summary" style="color:#444;"></p>
+      <p><strong>Price (AUD):</strong> <span id="d_price"></span></p>
+    </aside>
+
+    <footer style="text-align:center; margin-top:28px; color:#999; font-size:13px;">
+      SIT725 — Practical 5.2P
+    </footer>
+  </main>
+
+  <script>
+    // Minimal client script (works with your /api/books endpoints)
+    const fetchBtn = document.getElementById('fetchBtn');
+    const booksList = document.getElementById('booksList');
+    const loading = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+
+    const bookDetails = document.getElementById('bookDetails');
+    const d_title = document.getElementById('d_title');
+    const d_author = document.getElementById('d_author');
+    const d_year = document.getElementById('d_year');
+    const d_genre = document.getElementById('d_genre');
+    const d_summary = document.getElementById('d_summary');
+    const d_price = document.getElementById('d_price');
+    const closeDetails = document.getElementById('closeDetails');
+
+    function showLoading(msg = 'Loading...') {
+      loading.textContent = msg;
+      loading.style.display = 'block';
+    }
+    function hideLoading() {
+      loading.textContent = '';
+      loading.style.display = 'none';
+    }
+    function showError(msg) {
+      errorDiv.textContent = msg;
+      errorDiv.style.display = 'block';
+    }
+    function clearError() {
+      errorDiv.textContent = '';
+      errorDiv.style.display = 'none';
+    }
+
+    function formatPrice(p) {
+      if (p === undefined || p === null) return '';
+      // p might be Decimal string from server
+      const n = Number(p);
+      if (Number.isNaN(n)) return String(p) + ' AUD';
+      return n.toFixed(2) + ' AUD';
+    }
+
+    function renderList(items) {
+      booksList.innerHTML = '';
+      if (!Array.isArray(items) || items.length === 0) {
+        booksList.innerHTML = '<li style="color:#777;">No books found.</li>';
+        return;
+      }
+      items.forEach(it => {
+        const li = document.createElement('li');
+        li.className = 'book-item';
+        li.setAttribute('role', 'button');
+        li.setAttribute('tabindex', '0');
+        li.innerHTML = `
+          <div>
+            <div class="title">${it.title}</div>
+            <div class="author">${it.author}</div>
+          </div>
+          <div style="font-weight:600; color:#333;">${formatPrice(it.price)}</div>
+        `;
+        li.addEventListener('click', () => showDetails(it.id));
+        li.addEventListener('keypress', (e) => { if (e.key === 'Enter') showDetails(it.id); });
+        booksList.appendChild(li);
+      });
+    }
+
+    async function fetchBooks() {
+      clearError();
+      showLoading('Loading books...');
+      try {
+        const res = await fetch('/api/books');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const body = await res.json(); // { statusCode, data, message }
+        renderList(body.data || []);
+      } catch (err) {
+        console.error(err);
+        showError('Error fetching books: ' + err.message);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function showDetails(id) {
+      clearError();
+      showLoading('Loading details...');
+      try {
+        const res = await fetch('/api/books/' + id);
+        if (!res.ok) {
+          if (res.status === 404) throw new Error('Book not found');
+          throw new Error('HTTP ' + res.status);
+        }
+        const body = await res.json();
+        const b = body.data;
+        d_title.textContent = b.title || '';
+        d_author.textContent = b.author || '';
+        d_year.textContent = b.year || '';
+        d_genre.textContent = b.genre || '';
+        d_summary.textContent = b.summary || '';
+        d_price.textContent = formatPrice(b.price);
+        bookDetails.style.display = 'block';
+        // scroll into view on small screens
+        bookDetails.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        console.error(err);
+        showError('Error: ' + err.message);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    closeDetails.addEventListener('click', () => {
+      bookDetails.style.display = 'none';
+    });
+
+    // Hook events
+    fetchBtn.addEventListener('click', fetchBooks);
+    // Optionally fetch on load:
+    // window.addEventListener('load', fetchBooks);
+  </script>
+</body>
+</html>
