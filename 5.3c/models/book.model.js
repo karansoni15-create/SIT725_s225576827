@@ -1,13 +1,15 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const bookSchema = new mongoose.Schema({
-  id: String,
+const BookSchema = new mongoose.Schema({
   title: String,
   author: String,
   year: Number,
   genre: String,
   summary: String,
-  price: mongoose.Schema.Types.Decimal128
+  price: {
+    type: mongoose.Schema.Types.Decimal128,
+    required: true
+  }
 });
 
-module.exports = mongoose.model("Book", bookSchema);
+module.exports = mongoose.model('Book', BookSchema);
