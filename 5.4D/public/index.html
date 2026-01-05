@@ -75,7 +75,7 @@
       errorDiv.textContent = '';
     }
 
-    // ✅ FIX: supports Decimal128
+    
     function formatPrice(p) {
       if (!p) return '';
       if (typeof p === 'object' && p.$numberDecimal) {
@@ -127,7 +127,7 @@
         const res = await fetch('/api/books/' + id);
         const body = await res.json();
 
-        // ✅ FIX: GET by ID returns book directly
+        
         const b = body.data || body;
 
         d_title.textContent = b.title || '';
