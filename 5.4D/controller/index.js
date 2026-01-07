@@ -9,16 +9,27 @@ exports.getAllBooks = async (req, res) => {
   });
 };
 
-/* ---------- GET BOOK BY ID ---------- */
+
 exports.getBookById = async (req, res) => {
-  const book = await Book.findOne({ id: req.params.id });
-  if (!book) {
-    return res.status(404).json({ message: "Book not found" });
+  try {
+    const book = await Book.findOne({ id: req.params.id });
+
+    if (!book) {
+      return res.status(404).json({
+        message: "Book not found"
+      });
+    }
+
+    res.status(200).json(book);
+
+  } catch (err) {
+    res.status(400).json({
+      error: err.message
+    });
   }
-  res.status(200).json(book);
 };
 
-/* ---------- CREATE BOOK ---------- */
+
 exports.createBook = async (req, res) => {
   try {
     const book = new Book(req.body);
@@ -35,7 +46,6 @@ exports.createBook = async (req, res) => {
   }
 };
 
-/* ---------- UPDATE BOOK ---------- */
 exports.updateBook = async (req, res) => {
   if ("id" in req.body) {
     return res.status(400).json({ message: "ID cannot be updated" });
@@ -61,7 +71,10 @@ exports.updateBook = async (req, res) => {
   }
 };
 
-/* ---------- INTEGRITY CHECK ---------- */
+/*  INTEGRITY CHECK */
 exports.checkIntegrity = (req, res) => {
-  res.status(204).send();
+  res.status(200).json({
+    status: "OK",
+    studentId: "225576827"
+  });
 };
