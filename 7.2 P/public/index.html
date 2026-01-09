@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Real-Time Order Status Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>📦 Order Status Dashboard</h1>
+    <p class="subtitle">
+      Live order updates powered by Socket.IO
+    </p>
+
+    <div id="connectionStatus" class="status disconnected">
+      🔴 Disconnected
+    </div>
+
+    <div class="form">
+      <input id="username" type="text" placeholder="Staff / Operator Name">
+      <input id="status" type="text" placeholder="Order Status (Packing, Shipped, Delivered)">
+      <button id="updateBtn">Update Order</button>
+    </div>
+
+    <h3>Live Order Updates</h3>
+    <ul id="statusList"></ul>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+
+</body>
+</html>
