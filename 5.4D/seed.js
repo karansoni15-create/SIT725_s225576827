@@ -16,7 +16,7 @@ async function seed() {
         title: 'The Three-Body Problem',
         author: 'Liu Cixin',
         year: 2008,
-        genre: 'Science', // ✅ enum-compliant
+        genre: 'Science', 
         summary: 'The first novel in the Remembrance of Earth’s Past trilogy.',
         price: mongoose.Types.Decimal128.fromString('29.99')
       },
@@ -58,10 +58,10 @@ async function seed() {
       }
     ]);
 
-    console.log('✅ Database seeded successfully');
+    console.log(' Database seeded successfully');
     process.exit(0);
   } catch (err) {
-    console.error('❌ Seeding failed:', err.message);
+    console.error(' Seeding failed:', err.message);
     process.exit(1);
   }
 }
